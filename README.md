@@ -1,4 +1,5 @@
 # ThePunisher
+<<<<<<< HEAD
 The Punisher is a punishment system plugin for Rocketmod & Unturned meant to extend and replace GlobalBan (as it uses some of the same commands).
 
 Usage:
@@ -64,3 +65,6 @@ Added /report
 Added /warn
 Added /chatban
 Added /unchatban
+=======
+The Punisher is a Rocketmod Plugin for Unturned that adds extra options for punishing users.
+>>>>>>> origin/master
