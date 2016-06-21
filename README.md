@@ -1,8 +1,7 @@
 # ThePunisher
-<<<<<<< HEAD
 The Punisher is a punishment system plugin for Rocketmod & Unturned meant to extend and replace GlobalBan (as it uses some of the same commands).
 
-Usage:
+## Usage
 
 /kill -Causes the specified player to suicide
 
@@ -35,7 +34,7 @@ Usage:
 -bans the specified player
 
 
-Required Permissions:
+## Required Permissions:
 
 thepunisher.reports – allows the group to check current player reports
 thepunisher.ban – allows the group to ban a player
@@ -48,15 +47,14 @@ thepunisher.unban – allows the group to unban a banned player
 thepunisher.unchatban – allows the group to un-chat ban a player
 thepunisher.warn – allows a group to warn a player
 thepunisher.givereward – allows a group to reward players for reports
-Changelog:
 
+
+##Changelog:
 Coming in V1.0.2:
-
 Added /givereward
 Added /reports
 
 V1.0.1:
-
 Added commands from fr34kyn01535.Globalban
 Fixed a bug where /warn would not tell the user that he was warned
 Fixed a bug where /report would not tell the caller that it was successful.
@@ -65,6 +63,3 @@ Added /report
 Added /warn
 Added /chatban
 Added /unchatban
-=======
-The Punisher is a Rocketmod Plugin for Unturned that adds extra options for punishing users.
->>>>>>> origin/master
