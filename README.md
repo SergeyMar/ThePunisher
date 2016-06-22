@@ -60,12 +60,25 @@ thepunisher.givereward – allows a group to reward players for reports
 
 
 ##Changelog:
+Coming in V1.0.3:
 
-Coming in V1.0.2:
+Added /reports. Gets a list of unviewed reports.
 
-Added /givereward
+Added /removereport. Removes a report from the database. Does not reward player. Useful if report was a fake.
 
-Added /reports
+V1.0.2:
+
+Fixed missing translation for /kill
+
+Added /givereward (works for items and currency, kits in v1.0.4)
+
+Added "ShowDebugInfo" to config. Enable to see all debug messages made by ThePunisher. Useful for errors.
+
+Added "RewardLogs", when a player is rewarded the reward is logged to the db for reference
+
+Forced one report per player before admin review (ie, Gigawiz can only report Gigawiz once before the staff reviews the report)
+
+Added checks for reports against own name (above example should actually not work)
 
 V1.0.1:
 
