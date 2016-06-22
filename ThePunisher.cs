@@ -20,18 +20,68 @@ namespace rawrfuls.ThePunisher
     {
         public static ThePunisher Instance;
         public DatabaseManager Database;
-
+        public bool UconomyLoaded = false;
+        public bool KitsLoaded = false;
+        public bool LightLoaded = false;
         public static Dictionary<CSteamID, string> Players = new Dictionary<CSteamID, string>();
 
         protected override void Load()
         {
             Instance = this;
             Database = new DatabaseManager();
+            CheckDependancies(true);
             UnturnedPermissions.OnJoinRequested += Events_OnJoinRequested;
             U.Events.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
             UnturnedPlayerEvents.OnPlayerChatted += UnturnedPlayerEvents_OnPlayerChatted;
+            //UnregisterRocketCommand<T>();
         }
 
+        /*private static void UnregisterRocketCommand<T>() where T : IRocketCommand
+        {
+            var rocketComamnds = AccessorFactory.AccessField<List<IRocketCommand>>(
+                R.Commands, "commands");
+
+            rocketComamnds.Value.RemoveAll(cmd => cmd is T);
+        }*/
+
+        #region check for plugin dependancies
+        public void CheckDependancies(bool firstrun)
+        {
+            if (IsDependencyLoaded("Uconomy"))
+            {
+                UconomyLoaded = true;
+                if (Configuration.Instance.ShowDebugInfo)
+                    Logger.Log("Optional dependency Uconomy is present. Monetary rewards enabled.");
+            }
+            else
+            {
+                if (Configuration.Instance.ShowDebugInfo)
+                    Logger.Log("Optional dependency Uconomy is not present. Monetary rewards disabled.");
+            }
+            if (IsDependencyLoaded("Kits"))
+            {
+                KitsLoaded = true;
+                if (Configuration.Instance.ShowDebugInfo)
+                    Logger.Log("Optional dependency Kits is present. Kit rewards enabled.");
+            }
+            else
+            {
+                if (Configuration.Instance.ShowDebugInfo)
+                    Logger.Log("Optional dependency Kits is not present. Kit rewards disabled.");
+            }
+            if (IsDependencyLoaded("LPX"))
+            {
+                LightLoaded = true;
+                if (Configuration.Instance.ShowDebugInfo)
+                    Logger.Log("Optional dependency LPX is present. Kit rewards enabled.");
+            }
+            else
+            {
+                if (Configuration.Instance.ShowDebugInfo)
+                    Logger.Log("Optional dependency LPX is not present. Kit rewards disabled.");
+            }  
+        }
+        #endregion
         public void UnturnedPlayerEvents_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
         {
             string ChatBanned = Database.IsChatBanned(player.ToString());
@@ -66,7 +116,17 @@ namespace rawrfuls.ThePunisher
                     {"command_kick_private_default_reason","you were kicked from the server"},
                     {"command_warn_public_reason", "The player {0} was warned for: {1}"},
                     {"command_warn_public", "The player {0} was warned."},
+                    {"command_kill_public", "The player {0} was forced to kill himself."},
                     {"command_report_success", "Successfully reported player {0} for: {1}"},
+                    {"command_reward_success", "{0} has been given {1} for reporting a player"},
+                    {"command_reward_success_player", "You have been given {0} for reporting a player"},
+                    {"command_reward_plugin_unloaded", "Depenancy {0} has not been found. {1} rewards are disabled."},
+                    {"command_reward_item_failed", "Failed to give item {0} x{1} to player {2}."},
+                    {"command_reward_failed", "Failed to give {0} to player {2}."},
+                    {"command_generic_player_previously_awarded", "{0} was allready awarded for his/her report!"},
+                    {"command_generic_player_has_not_reported", "{0} has not recently reported anyone!"},
+                    {"player_allready_reported", "You have allready reported {0}!"},
+                    {"player_is_you", "You cannot report yourself!"},
                 };
             }
         }
@@ -104,6 +164,7 @@ namespace rawrfuls.ThePunisher
             {
                 
             }
+            CheckDependancies(false);
         }
     }
 }

@@ -13,7 +13,9 @@ namespace rawrfuls.ThePunisher
         public string DatabaseReportTableName;
         public string DatabaseWarningTableName;
         public string DatabaseChatbanTableName;
+        public string DatabaseRewardlogTableName;
         public int DatabasePort;
+        public bool ShowDebugInfo;
 
         public void LoadDefaults()
         {
@@ -24,8 +26,10 @@ namespace rawrfuls.ThePunisher
             DatabaseTableName = "banlist";
             DatabaseReportTableName = "player_reports";
             DatabaseWarningTableName = "player_warnings";
-            DatabaseChatbanTableName = "Chatbans";
+            DatabaseChatbanTableName = "chatbans";
+            DatabaseRewardlogTableName = "reward_logs";
             DatabasePort = 3306;
+            ShowDebugInfo = true;
         }
     }
 }

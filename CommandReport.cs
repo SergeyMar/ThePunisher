@@ -92,7 +92,16 @@ namespace rawrfuls.ThePunisher
                     steamid = otherPlayer.CSteamID;
                     charactername = otherPlayer.CharacterName;
                 }
-
+                if (caller.ToString() == steamid.ToString())
+                {
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("player_is_you"));
+                    return;
+                }
+                if (ThePunisher.Instance.Database.HasReported(steamid.ToString(), caller.ToString()) != null)
+                {
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("player_allready_reported", charactername));
+                    return;
+                }
                 string adminName = "Console";
                 if (caller != null) adminName = caller.ToString();
 
