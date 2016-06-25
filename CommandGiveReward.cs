@@ -9,6 +9,7 @@ using Steamworks;
 using System.Collections.Generic;
 using Rocket.Core.Steam;
 using System;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
@@ -52,7 +53,7 @@ namespace rawrfuls.ThePunisher
             {
                 if (command.Length < 3 || command.Length > 4)
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                     return;
                 }
 
@@ -82,7 +83,7 @@ namespace rawrfuls.ThePunisher
                         }
                         else
                         {
-                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                             return;
                         }
                     }
@@ -95,14 +96,14 @@ namespace rawrfuls.ThePunisher
                 }
                 if (ThePunisher.Instance.Database.HasBeenRewarded(steamid.ToString()) != null)
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_previously_awarded", charactername));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_previously_awarded", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                     return;
                 }
                 else
                 {
                     if (ThePunisher.Instance.Database.HasReported(steamid.ToString()) == null)
                     {
-                        UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_has_not_reported", charactername));
+                        UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_has_not_reported", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                         return;
                     }
                 }
@@ -134,6 +135,30 @@ namespace rawrfuls.ThePunisher
                         UnturnedChat.Say(caller, "Kit rewards coming soon!", UnityEngine.Color.red);
                         #endregion
                     }
+                    else if (command[1] == "car")
+                    {
+                        #region car rewards
+                        try
+                        {
+
+                            if (!otherPlayer.GiveVehicle(Convert.ToUInt16(command[2])))
+                            {
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                            }
+                            else
+                            {
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                                UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_car_success_player"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                                ThePunisher.Instance.Database.RewardForReport(steamid.ToString());
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                            Logger.LogException(ex, "Failed giving item " + command[2] + " to player" + command[0]);
+                        }
+                        #endregion
+                    }
                     else if (command[1] == "item")
                     {
                         #region item rewards
@@ -142,18 +167,18 @@ namespace rawrfuls.ThePunisher
                             
                             if (!otherPlayer.GiveItem(Convert.ToUInt16(command[2]),Convert.ToByte(command[3])))
                             {
-                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]));
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                             }
                             else
                             {
-                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), UnityEngine.Color.green);
-                                UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), UnityEngine.Color.green);
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                                UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success_player", command[0], command[2]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                                 ThePunisher.Instance.Database.RewardForReport(steamid.ToString());
                             }
                         }
                         catch (Exception ex)
                         {
-                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]));
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                             Logger.LogException(ex, "Failed giving item " + command[2] + " to player" + command[0]);
                         }
                         #endregion
@@ -179,19 +204,19 @@ namespace rawrfuls.ThePunisher
                                     fr34kyn01535.Uconomy.Uconomy Uconomy = (fr34kyn01535.Uconomy.Uconomy)plugin;
                                     currencyname = Uconomy.Configuration.Instance.MoneyName;
                                     Uconomy.Database.IncreaseBalance(steamid.ToString(), Convert.ToDecimal(command[2]));
-                                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", charactername, command[2] + " " + currencyname), UnityEngine.Color.green);
-                                    UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success_player", command[2] + " " + currencyname), UnityEngine.Color.green);
+                                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", charactername, command[2] + " " + currencyname), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                                    UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success_player", command[2] + " " + currencyname), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                                     ThePunisher.Instance.Database.RewardForReport(steamid.ToString());
                                 }
                                 catch (Exception ex)
                                 {
-                                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_failed", charactername, command[2] + " " + currencyname), UnityEngine.Color.green);
+                                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_failed", charactername, command[2] + " " + currencyname), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                                 }
                             });
                         }
                         else
                         {
-                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_plugin_unloaded", "Uconomy", command[1]), UnityEngine.Color.red);
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_plugin_unloaded", "Uconomy", command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                         }
                         #endregion
                     }
@@ -203,18 +228,42 @@ namespace rawrfuls.ThePunisher
 
                             if (!otherPlayer.GiveItem(Convert.ToUInt16(command[2]), 1))
                             {
-                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], 1, command[0]));
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], 1, command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                             }
                             else
                             {
-                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), UnityEngine.Color.green);
-                                UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), UnityEngine.Color.green);
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]),(Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                                UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success_player", command[0], command[2]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                                 ThePunisher.Instance.Database.RewardForReport(steamid.ToString());
                             }
                         }
                         catch (Exception ex)
                         {
-                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], 1, command[0]));
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], 1, command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                            Logger.LogException(ex, "Failed giving item " + command[2] + " to player" + command[0]);
+                        }
+                        #endregion
+                    }
+                    else if (command[1] == "car")
+                    {
+                        #region car rewards
+                        try
+                        {
+
+                            if (!otherPlayer.GiveVehicle(Convert.ToUInt16(command[2])))
+                            {
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                            }
+                            else
+                            {
+                                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_success", command[0], command[2]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                                UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_reward_success_player", command[0], command[2]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                                ThePunisher.Instance.Database.RewardForReport(steamid.ToString());
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_reward_item_failed", command[2], command[3], command[0]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                             Logger.LogException(ex, "Failed giving item " + command[2] + " to player" + command[0]);
                         }
                         #endregion
@@ -222,7 +271,7 @@ namespace rawrfuls.ThePunisher
                 }
                 else
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                 }
 
             }

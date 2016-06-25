@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
@@ -21,7 +22,7 @@ namespace rawrfuls.ThePunisher
 
         public string Syntax
         {
-            get { return "<player>"; }
+            get { return "<player> [silent]"; }
         }
 
         public List<string> Aliases
@@ -45,20 +46,40 @@ namespace rawrfuls.ThePunisher
         public void Execute(IRocketPlayer caller, params string[] command)
         {
 
-            if (command.Length == 0 || command.Length > 1)
+            if (command.Length == 0 || command.Length > 2)
             {
-                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                 return;
             }
-            UnturnedPlayer playerToKick = UnturnedPlayer.FromName(command[0]);
-            if (playerToKick == null)
+            UnturnedPlayer playerToKill = UnturnedPlayer.FromName(command[0]);
+            if (playerToKill == null)
             {
-                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
+                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                 return;
             }
-
-            UnturnedChat.Say(ThePunisher.Instance.Translate("command_kill_public", playerToKick.SteamName));
-            playerToKick.Suicide();
+            if (command.Length == 2)
+            {
+                if (command[1] == "silent")
+                {
+                    /*playerToKill.Thirst = 1;
+                    playerToKill.Hunger = 1;
+                    playerToKill.Bleeding = true;
+                    playerToKill.Broken = true;*/
+                    UnturnedChat.Say(caller, "The silent switch is still a work in progress. Currently only force suicide works, however we won't display the forced suicide message.", (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                    //UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_kill_public", playerToKill.SteamName), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                    playerToKill.Suicide();
+                }
+                else
+                {
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_kill_public", playerToKill.SteamName), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                    playerToKill.Suicide();
+                }
+            }
+            else
+            {
+                UnturnedChat.Say(ThePunisher.Instance.Translate("command_kill_public", playerToKill.SteamName), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                playerToKill.Suicide();
+            }
         }
     }
 }

@@ -12,24 +12,25 @@ using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
-    public class CommandWarn : IRocketCommand
+    public class CommandWhitelist : IRocketCommand
     {
         public string Help
         {
-            get { return  "Warns a player"; }
+            get { return "Whitelists a player"; }
         }
 
         public string Name
         {
-            get { return "warn"; }
+            get { return "whitelist"; }
         }
 
         public string Syntax
         {
-            get { return "<player> [reason]"; }
+            get { return "<player>"; }
         }
 
-        public List<string> Aliases {
+        public List<string> Aliases
+        {
             get { return new List<string>(); }
         }
 
@@ -42,17 +43,24 @@ namespace rawrfuls.ThePunisher
         {
             get
             {
-                return new List<string>() { "thepunisher.warn" };
+                return new List<string>() { "thepunisher.whitelist" };
             }
         }
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
+            if (!ThePunisher.Instance.Configuration.Instance.WhiteListEnabled)
+            {
+                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("whitelist_disabled_error"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log(ThePunisher.Instance.Translate("whitelist_disabled_error")); }
+                return;
+            }
             try
             {
-                if (command.Length == 0 || command.Length > 2)
+                if (command.Length > 1)
                 {
                     UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
+                    if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log(ThePunisher.Instance.Translate("command_generic_invalid_parameter")); }
                     return;
                 }
 
@@ -60,7 +68,7 @@ namespace rawrfuls.ThePunisher
 
                 CSteamID steamid;
                 string charactername = null;
-                
+
 
                 UnturnedPlayer otherPlayer = UnturnedPlayer.FromName(command[0]);
                 ulong? otherPlayerID = command.GetCSteamIDParameter(0);
@@ -92,23 +100,14 @@ namespace rawrfuls.ThePunisher
                     isOnline = true;
                     steamid = otherPlayer.CSteamID;
                     charactername = otherPlayer.CharacterName;
+                    if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Found steam ID and player name of player to ban."); }
                 }
 
                 string adminName = "Console";
                 if (caller != null) adminName = caller.ToString();
-
-                 if (command.Length == 2)
-                {
-
-                    ThePunisher.Instance.Database.WarnPlayer(charactername, steamid.ToString(), adminName, command[1]);
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_warn_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
-                }
-                else
-                {
-                    ThePunisher.Instance.Database.WarnPlayer(charactername, steamid.ToString(), adminName, "");
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_warn_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
-                }
-
+                ThePunisher.Instance.Database.WhiteListPlayer(charactername, steamid.ToString(), adminName);
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Player successfully whitelisted."); }
+                UnturnedChat.Say(ThePunisher.Instance.Translate("command_whitelist_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
             }
             catch (System.Exception ex)
             {

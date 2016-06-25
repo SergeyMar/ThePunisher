@@ -1,5 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
+using Rocket.API;
 using Rocket.Core.Logging;
+using Rocket.Unturned.Chat;
 using System;
 using System.Collections.Generic;
 
@@ -20,6 +22,7 @@ namespace rawrfuls.ThePunisher
             CheckWarnSchema();
             CheckReportSchema();
             CheckRewardlogSchema();
+            CheckWhitelistSchema();
             if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
                 EndSchemaChecks();
         }
@@ -109,11 +112,82 @@ namespace rawrfuls.ThePunisher
             }
         }
 
-        public string GetReports()
+        public int getTotalRows(string table)
         {
-            string output = "This feature is not available yet";
-            
-            return output;
+            MySqlConnection connection = createConnection();
+            using (MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) FROM `" + table + "`", connection))
+            {
+                connection.Open();
+                object totalrows = cmd.ExecuteScalar();
+                connection.Close();
+                return Convert.ToInt32(totalrows);
+            }
+        }
+
+        public void GetReports(IRocketPlayer caller, int page)
+        {
+            try
+            {
+                int maxPerPage = 2;
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Set max items per page to " + maxPerPage.ToString()); }
+                int total_rows = getTotalRows(ThePunisher.Instance.Configuration.Instance.DatabaseReportTableName);
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Got total rows in db:" + total_rows.ToString()); }
+                int offset = 0;
+                if (page > 0) { offset = maxPerPage * page; }
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Set offset to: " + offset.ToString()); }
+                MySqlConnection connection = createConnection();
+                MySqlCommand command = connection.CreateCommand();
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Successfully created mysql connection"); }
+                command.Parameters.AddWithValue("@maxPerPage", maxPerPage);
+                command.Parameters.AddWithValue("@page", page);
+                command.CommandText = "select * from `" + ThePunisher.Instance.Configuration.Instance.DatabaseReportTableName + "` LIMIT " + offset + "," + maxPerPage + ";";
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Created MySql Query"); }
+                connection.Open();
+                MySqlDataReader reader = command.ExecuteReader();
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Executed MySql Query"); }
+                if (reader.HasRows)
+                {
+                    if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Reader object opened"); }
+                    while (reader.Read())
+                    {
+                        Logger.Log(reader.GetUInt64(1).ToString());
+                        Logger.Log(reader.GetString(2));
+                        Logger.Log(reader.GetString(3));
+                        Logger.Log(reader.GetString(4));
+                        Logger.Log(reader.GetString(5));
+                        UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+
+                    }
+                    /*command = connection.CreateCommand();
+                    command.Parameters.AddWithValue("@steamId", steamId);
+                    command.Parameters.AddWithValue("@reportee", reportee);
+                    command.Parameters.AddWithValue("@reportMessage", reportMessage);
+                    command.Parameters.AddWithValue("@characterName", characterName);
+                    command.Parameters.AddWithValue("@reportTime", reportTime);
+                    command.Parameters.AddWithValue("@rewarded", rewarded);
+                    command.CommandText = "INSERT INTO `" + ThePunisher.Instance.Configuration.Instance.DatabaseRewardlogTableName + "` (`steamId`, `reportee`, `reportMessage`, `charactername`, `reportTime`, `rewarded`) VALUES (@steamId, @reportee, @reportMessage, @characterName, @reportTime, @rewarded);";
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                    /*command = connection.CreateCommand();
+                    command.Parameters.AddWithValue("@steamId", steamId);
+                    command.Parameters.AddWithValue("@reportee", reportee);
+                    command.CommandText = "delete from `" + ThePunisher.Instance.Configuration.Instance.DatabaseReportTableName + "` where `steamId` = @steamId AND `reportee`= @reportee;";
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    connection.Close();*/
+                }
+                else
+                {
+                    Logger.Log("No rows found.");
+                }
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    Logger.LogException(ex);
+            }
         }
 
         public string IsBanned(string steamId)
@@ -273,12 +347,34 @@ namespace rawrfuls.ThePunisher
             return output;
         }
 
+        public string IsWhitelisted(string steamId)
+        {
+            string output = null;
+            try
+            {
+                MySqlConnection connection = createConnection();
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "select `characterName` from `" + ThePunisher.Instance.Configuration.Instance.DatabaseWhiteListTableName + "` where `steamId` = '" + steamId + "';";
+                connection.Open();
+                object result = command.ExecuteScalar();
+                if (result != null) output = result.ToString();
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    Logger.LogException(ex);
+            }
+            return output;
+        }
+
         #region Schema Checks
         private bool BanLoaded = false;
         private bool ChatBanLoaded = false;
         private bool WarnLoaded = false;
         private bool ReportLoaded = false;
         private bool RewardLogLoaded = false;
+        private bool WhitelistLoaded = false;
         public void CheckBanSchema()
         {
             try
@@ -475,7 +571,48 @@ namespace rawrfuls.ThePunisher
                 Logger.LogException(ex);
             }
         }
+        public void CheckWhitelistSchema()
+        {
+            if (!ThePunisher.Instance.Configuration.Instance.WhiteListEnabled)
+                return;
 
+            try
+            {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                {
+                    Logger.Log("Checking Whitelist Table...");
+                }
+                MySqlConnection connection = createConnection();
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "show tables like '" + ThePunisher.Instance.Configuration.Instance.DatabaseWhiteListTableName + "'";
+                connection.Open();
+                object test = command.ExecuteScalar();
+
+                if (test == null)
+                {
+                    if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    {
+                        Logger.Log("Creating Whitelist Table...");
+                    }
+                    command.CommandText = "CREATE TABLE `" + ThePunisher.Instance.Configuration.Instance.DatabaseWhiteListTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`charactername` varchar(255) DEFAULT NULL,`added_on` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,`chatbanned` TEXT NULL,PRIMARY KEY (`id`));";
+                    command.ExecuteNonQuery();
+                    if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    {
+                        Logger.Log("Whitelist Table Successfully created...");
+                    }
+                }
+                connection.Close();
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                {
+                    Logger.Log("Whitelist Table Schema successfully validated...");
+                }
+                WhitelistLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+        }
         public void EndSchemaChecks()
         {
             if (!BanLoaded)
@@ -503,10 +640,35 @@ namespace rawrfuls.ThePunisher
                 Logger.LogError("Reward Log table failed to initialize! Unloading now!");
                 return;
             }
+            if (!WhitelistLoaded && ThePunisher.Instance.Configuration.Instance.WhiteListEnabled)
+            {
+                Logger.LogError("Whitelist table failed to initialize! Unloading now!");
+                return;
+            }
             Logger.Log("All tables successfully validated and loaded!");
         }
         #endregion
 
+        public void WhiteListPlayer(string characterName, string steamid, string admin)
+        {
+            try
+            {
+                MySqlConnection connection = createConnection();
+                MySqlCommand command = connection.CreateCommand();
+                command.Parameters.AddWithValue("@csteamid", steamid);
+                command.Parameters.AddWithValue("@admin", admin);
+                command.Parameters.AddWithValue("@charactername", characterName);
+                command.CommandText = "insert into `" + ThePunisher.Instance.Configuration.Instance.DatabaseWhiteListTableName + "` (`steamId`,`admin`,`charactername`,added_on) values(@csteamid,@admin,@charactername,now());";
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    Logger.LogException(ex);
+            }
+        }
 
         public void ChatBanPlayer(string characterName, string steamid, string admin, string banMessage, int duration)
         {
@@ -546,11 +708,14 @@ namespace rawrfuls.ThePunisher
 
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Connection to Ban table created!"); }
                 if (banMessage == null) banMessage = "";
                 command.Parameters.AddWithValue("@csteamid", steamid);
                 command.Parameters.AddWithValue("@admin", admin);
                 command.Parameters.AddWithValue("@charactername", characterName);
                 command.Parameters.AddWithValue("@banMessage", banMessage);
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Command paramaters added!"); }
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Banning: " + steamid + " - " + characterName + " from the server."); }
                 if (duration == 0)
                 {
                     command.Parameters.AddWithValue("@banDuration", DBNull.Value);
@@ -559,9 +724,14 @@ namespace rawrfuls.ThePunisher
                 {
                     command.Parameters.AddWithValue("@banDuration", duration);
                 }
-                command.CommandText = "insert into `" + ThePunisher.Instance.Configuration.Instance.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@admin,@banMessage,@charactername,now(),@banDuration);";
+                string query = "insert into `" + ThePunisher.Instance.Configuration.Instance.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@admin,@banMessage,@charactername,now(),@banDuration);";
+                command.CommandText = query;
+                
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Query Created: " + query); }
                 connection.Open();
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Connection to database opened"); }
                 command.ExecuteNonQuery();
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Command executed Successfully. Player has been banned."); }
                 connection.Close();
             }
             catch (Exception ex)
@@ -574,6 +744,116 @@ namespace rawrfuls.ThePunisher
         public class UnbanResult {
             public ulong Id;
             public string Name;
+        }
+
+        public class BlacklistResult
+        {
+            public ulong Id;
+            public string Name;
+        }
+
+        public BlacklistResult BlacklistPlayer(string player)
+        {
+            try
+            {
+                MySqlConnection connection = createConnection();
+
+                MySqlCommand command = connection.CreateCommand();
+                command.Parameters.AddWithValue("@player", "%" + player + "%");
+                command.CommandText = "select steamId,charactername from `" + ThePunisher.Instance.Configuration.Instance.DatabaseWhiteListTableName + "` where `steamId` like @player or `charactername` like @player limit 1;";
+                connection.Open();
+                MySqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    ulong steamId = reader.GetUInt64(0);
+                    string charactername = reader.GetString(1);
+                    connection.Close();
+                    command = connection.CreateCommand();
+                    command.Parameters.AddWithValue("@steamId", steamId);
+                    command.CommandText = "delete from `" + ThePunisher.Instance.Configuration.Instance.DatabaseWhiteListTableName + "` where `steamId` = @steamId;";
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                    return new BlacklistResult() { Id = steamId, Name = charactername };
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    Logger.LogException(ex);
+            }
+            return null;
+        }
+
+        public class ReportDeleteResult
+        {
+            public ulong Id;
+            public string Reporter;
+            public string Reportee;
+        }
+
+        public ReportDeleteResult RemoveReport(string id = null, string player = null, string reporter = null)
+        {
+            if (id == null && player == null && reporter == null)
+            {
+                return null;
+            }
+            try
+            {
+                MySqlConnection connection = createConnection();
+                MySqlCommand command = connection.CreateCommand();
+                if (String.IsNullOrEmpty(player))
+                { }
+                command.Parameters.AddWithValue("@id", "%" + id + "%");
+                command.Parameters.AddWithValue("@player", "%" + player + "%");
+                command.Parameters.AddWithValue("@reportee", "%" + reporter + "%");
+                string cmd = "select steamId,charactername,reportee from `" + ThePunisher.Instance.Configuration.Instance.DatabaseReportTableName + "` where ";
+                if (id != null)
+                {
+                    cmd = cmd + "`id` like @id ";
+                }
+                if (player != null)
+                {
+                    if (id != null)
+                    {
+                        cmd = cmd + " OR";
+                    }
+                    cmd = cmd + " ";
+                }
+                if (reporter != null)
+                {
+                    if (player != null)
+                    {
+                        cmd = cmd + " OR";
+                    }
+                    cmd = cmd + " `reportee` like @reporter";
+                }
+                cmd = cmd + " limit 1;";
+                command.CommandText = cmd;
+                connection.Open();
+                MySqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    ulong steamId = reader.GetUInt64(0);
+                    string charactername = reader.GetString(1);
+                    string reportee = reader.GetString(2);
+                    connection.Close();
+                    command = connection.CreateCommand();
+                    command.Parameters.AddWithValue("@steamId", steamId);
+                    command.Parameters.AddWithValue("@reportee", reportee);
+                    command.CommandText = "delete from `" + ThePunisher.Instance.Configuration.Instance.DatabaseReportTableName + "` where `steamId` = @steamId AND `reportee` = @reportee;";
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    connection.Close();
+                    return new ReportDeleteResult() { Id = steamId, Reporter = charactername, Reportee = reportee };
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo)
+                    Logger.LogException(ex);
+            }
+            return null;
         }
 
         public UnbanResult UnChatbanPlayer(string player)

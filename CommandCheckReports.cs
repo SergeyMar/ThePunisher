@@ -8,6 +8,8 @@ using SDG.Unturned;
 using Steamworks;
 using System.Collections.Generic;
 using Rocket.Core.Steam;
+using System;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
@@ -15,7 +17,7 @@ namespace rawrfuls.ThePunisher
     {
         public string Help
         {
-            get { return  "Gets all active player reports"; }
+            get { return  "Gets all recent player reports"; }
         }
 
         public string Name
@@ -49,23 +51,34 @@ namespace rawrfuls.ThePunisher
         {
             try
             {
-                if (command.Length > 0)
+                //if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log(""); }
+                /*if (command.Length > 1)
                 {
                     UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
                     return;
                 }
-
                 string adminName = "Console";
                 if (caller != null) adminName = caller.ToString();
-                if (caller.IsAdmin)
+                if (command.Length == 0)
                 {
-                    string activereports = ThePunisher.Instance.Database.GetReports();
-                    UnturnedChat.Say(activereports);
+                    ThePunisher.Instance.Database.GetReports(caller, 0);
+                    return;
                 }
-
+                else if (command.Length == 1)
+                {
+                    ThePunisher.Instance.Database.GetReports(caller, Convert.ToInt32(command[0]));
+                    return;
+                }
+                else
+                {
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                    return;
+                }*/
+                UnturnedChat.Say(caller, "Report checks is still being worked on!", (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
             }
             catch (System.Exception ex)
             {
+                if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Overall Exception"); }
                 Logger.LogException(ex);
             }
         }

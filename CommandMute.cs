@@ -8,19 +8,20 @@ using SDG.Unturned;
 using Steamworks;
 using System.Collections.Generic;
 using Rocket.Core.Steam;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
-    public class CommandChatBan : IRocketCommand
+    public class CommandMute : IRocketCommand
     {
         public string Help
         {
-            get { return  "Chat bans a player"; }
+            get { return  "Mutes a player"; }
         }
 
         public string Name
         {
-            get { return "chatban"; }
+            get { return "mute"; }
         }
 
         public string Syntax
@@ -41,7 +42,7 @@ namespace rawrfuls.ThePunisher
         {
             get
             {
-                return new List<string>() { "thepunisher.chatban" };
+                return new List<string>() { "thepunisher.mute" };
             }
         }
 
@@ -51,7 +52,7 @@ namespace rawrfuls.ThePunisher
             {
                 if (command.Length == 0 || command.Length > 3)
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                     return;
                 }
 
@@ -81,7 +82,7 @@ namespace rawrfuls.ThePunisher
                         }
                         else
                         {
-                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                             return;
                         }
                     }
@@ -103,13 +104,12 @@ namespace rawrfuls.ThePunisher
                     {
 
                         ThePunisher.Instance.Database.ChatBanPlayer(charactername, steamid.ToString(), adminName, command[1], duration);
-                        UnturnedChat.Say(ThePunisher.Instance.Translate("command_chatban_public_reason", charactername, command[1]));
-                        if (isOnline)
-                            Provider.kick(steamid, command[1]);
+                        UnturnedChat.Say(ThePunisher.Instance.Translate("command_mute_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                        UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_mute_private_default_reason", command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                     }
                     else
                     {
-                        UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                        UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                         return;
                     }
                 }
@@ -117,16 +117,14 @@ namespace rawrfuls.ThePunisher
                 {
 
                     ThePunisher.Instance.Database.ChatBanPlayer(charactername, steamid.ToString(), adminName, command[1], 0);
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_chatban_public_reason", charactername, command[1]));
-                    if (isOnline)
-                        Provider.kick(steamid, command[1]);
+                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_mute_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                    UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_mute_private_default_reason", command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 }
                 else
                 {
                     ThePunisher.Instance.Database.ChatBanPlayer(charactername, steamid.ToString(), adminName, "", 0);
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_chatban_public", charactername));
-                    if (isOnline)
-                        Provider.kick(steamid, ThePunisher.Instance.Translate("command_chatban_private_default_reason"));
+                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_mute_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                    UnturnedChat.Say(steamid, ThePunisher.Instance.Translate("command_mute_private_default"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 }
 
             }

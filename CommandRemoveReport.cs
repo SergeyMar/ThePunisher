@@ -7,21 +7,21 @@ using System.Collections.Generic;
 
 namespace rawrfuls.ThePunisher
 {
-    public class CommandUnChatban : IRocketCommand
+    public class CommandRemovereport : IRocketCommand
     {
         public string Help
         {
-            get { return "Unbans a player from chat"; }
+            get { return "Deletes an unwanted/invalid report"; }
         }
 
         public string Name
         {
-            get { return "unchatban"; }
+            get { return "removereport"; }
         }
 
         public string Syntax
         {
-            get { return "<player>"; }
+            get { return "<player|report id>"; }
         }
 
         public List<string> Aliases
@@ -38,7 +38,7 @@ namespace rawrfuls.ThePunisher
         {
             get
             {
-                return new List<string>() { "thepunisher.unchatban" };
+                return new List<string>() { "thepunisher.removereport" };
             }
         }
 
@@ -49,8 +49,8 @@ namespace rawrfuls.ThePunisher
                 UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
-
-            rawrfuls.ThePunisher.DatabaseManager.UnbanResult name = ThePunisher.Instance.Database.UnChatbanPlayer(command[0]);
+            UnturnedChat.Say(caller, "This function is not yet completed!");
+            /*rawrfuls.ThePunisher.DatabaseManager.UnbanResult name = ThePunisher.Instance.Database.UnbanPlayer(command[0]);
             if (!SteamBlacklist.unban(new CSteamID(name.Id)) && String.IsNullOrEmpty(name.Name))
             {
                 UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
@@ -58,8 +58,8 @@ namespace rawrfuls.ThePunisher
             }
             else
             {
-                UnturnedChat.Say("The player " + name.Name + " was unbanned from chat");
-            }
+                UnturnedChat.Say("The player " + name.Name + " was unbanned");
+            }*/
         }
 
     }

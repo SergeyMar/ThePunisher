@@ -7,6 +7,7 @@ using SDG;
 using SDG.Unturned;
 using Steamworks;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
@@ -52,7 +53,7 @@ namespace rawrfuls.ThePunisher
 
             if (command.Length == 0 || command.Length > 2)
             {
-                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                 return;
             }
 
@@ -69,7 +70,7 @@ namespace rawrfuls.ThePunisher
                 }
                 else
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                     return;
                 }
             }
@@ -83,16 +84,24 @@ namespace rawrfuls.ThePunisher
             if (command.Length >= 2)
             {
                 ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), command[1], 31536000);
-                UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]));
+                UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 if (isOnline)
+                {
+                    UnturnedPlayer killplayer = UnturnedPlayer.FromCSteamID(steamid);
+                    killplayer.Suicide();
                     Provider.kick(steamPlayerID.CSteamID, command[1]);
+                }
             }
             else
             {
                 ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), "", 31536000);
-                UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public", charactername));
+                UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 if (isOnline)
+                {
+                    UnturnedPlayer killplayer = UnturnedPlayer.FromCSteamID(steamid);
+                    killplayer.Suicide();
                     Provider.kick(steamPlayerID.CSteamID, ThePunisher.Instance.Translate("command_ban_private_default_reason"));
+                }
             }
         }
     }

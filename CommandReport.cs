@@ -8,6 +8,7 @@ using SDG.Unturned;
 using Steamworks;
 using System.Collections.Generic;
 using Rocket.Core.Steam;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
@@ -51,7 +52,7 @@ namespace rawrfuls.ThePunisher
             {
                 if (command.Length == 0 || command.Length > 2)
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                     return;
                 }
 
@@ -81,7 +82,7 @@ namespace rawrfuls.ThePunisher
                         }
                         else
                         {
-                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
+                            UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                             return;
                         }
                     }
@@ -94,12 +95,12 @@ namespace rawrfuls.ThePunisher
                 }
                 if (caller.ToString() == steamid.ToString())
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("player_is_you"));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("player_is_you"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                     return;
                 }
                 if (ThePunisher.Instance.Database.HasReported(steamid.ToString(), caller.ToString()) != null)
                 {
-                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("player_allready_reported", charactername));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("player_allready_reported", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                     return;
                 }
                 string adminName = "Console";
@@ -108,12 +109,12 @@ namespace rawrfuls.ThePunisher
                 if (command.Length == 2)
                 {
                     ThePunisher.Instance.Database.ReportPlayer(charactername, steamid.ToString(), adminName, command[1]);
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_report_success", charactername, command[1]));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_report_success", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 }
                 else
                 {
                     ThePunisher.Instance.Database.ReportPlayer(charactername, steamid.ToString(), adminName, "");
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_report_success", charactername, command[1]));
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_report_success", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 }
 
             }

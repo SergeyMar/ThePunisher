@@ -14,8 +14,12 @@ namespace rawrfuls.ThePunisher
         public string DatabaseWarningTableName;
         public string DatabaseChatbanTableName;
         public string DatabaseRewardlogTableName;
+        public string DatabaseWhiteListTableName;
+        public bool WhiteListEnabled;
         public int DatabasePort;
         public bool ShowDebugInfo;
+        public string PublicMessageColor;
+        public string PrivateMessageColor;
 
         public void LoadDefaults()
         {
@@ -28,8 +32,12 @@ namespace rawrfuls.ThePunisher
             DatabaseWarningTableName = "player_warnings";
             DatabaseChatbanTableName = "chatbans";
             DatabaseRewardlogTableName = "reward_logs";
+            WhiteListEnabled = false;
+            DatabaseWhiteListTableName = "whitelist";
             DatabasePort = 3306;
-            ShowDebugInfo = true;
+            ShowDebugInfo = false;
+            PublicMessageColor = "Red";
+            PrivateMessageColor = "Green";
         }
     }
 }

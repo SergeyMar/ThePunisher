@@ -4,6 +4,7 @@ using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace rawrfuls.ThePunisher
 {
@@ -46,19 +47,19 @@ namespace rawrfuls.ThePunisher
         {
             if (command.Length != 1)
             {
-                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"));
+                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_invalid_parameter"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                 return;
             }
 
             rawrfuls.ThePunisher.DatabaseManager.UnbanResult name = ThePunisher.Instance.Database.UnbanPlayer(command[0]);
             if (!SteamBlacklist.unban(new CSteamID(name.Id)) && String.IsNullOrEmpty(name.Name))
             {
-                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"));
+                UnturnedChat.Say(caller, ThePunisher.Instance.Translate("command_generic_player_not_found"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PrivateMessageColor));
                 return;
             }
             else
             {
-                UnturnedChat.Say("The player " + name.Name + " was unbanned");
+                UnturnedChat.Say(ThePunisher.Instance.Translate("command_unban_public"), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
             }
         }
 

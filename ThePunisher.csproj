@@ -103,15 +103,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandBlacklist.cs" />
+    <Compile Include="CommandWhitelist.cs" />
     <Compile Include="CommandKill.cs" />
     <Compile Include="CommandCheckReports.cs" />
     <Compile Include="CommandReport.cs" />
     <Compile Include="CommandGiveReward.cs" />
+    <Compile Include="CommandRemoveReport.cs" />
     <Compile Include="CommandWarn.cs" />
-    <Compile Include="CommandChatBan.cs" />
+    <Compile Include="CommandMute.cs" />
     <Compile Include="CommandSlay.cs" />
     <Compile Include="CommandKick.cs" />
-    <Compile Include="CommandUnChatban.cs" />
+    <Compile Include="CommandUnmute.cs" />
     <Compile Include="DatabaseManager.cs" />
     <Compile Include="CommandUnban.cs" />
     <Compile Include="CommandBan.cs" />
