@@ -59,12 +59,14 @@ namespace rawrfuls.ThePunisher
             }
             if (command.Length >= 2)
             {
-                UnturnedChat.Say(ThePunisher.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                if (ThePunisher.Instance.Configuration.Instance.DisplayBanMessagePublic)
+                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 Provider.kick(playerToKick.CSteamID, command[1]);
             }
             else
             {
-                UnturnedChat.Say(ThePunisher.Instance.Translate("command_kick_public", playerToKick.SteamName), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                if (ThePunisher.Instance.Configuration.Instance.DisplayBanMessagePublic)
+                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_kick_public", playerToKick.SteamName), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 Provider.kick(playerToKick.CSteamID, ThePunisher.Instance.Translate("command_kick_private_default_reason"));
             }
         }

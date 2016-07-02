@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandBlacklist.cs" />
+    <Compile Include="CommandWarnings.cs" />
     <Compile Include="CommandWhitelist.cs" />
     <Compile Include="CommandKill.cs" />
     <Compile Include="CommandCheckReports.cs" />

@@ -9,6 +9,7 @@ using Steamworks;
 using System.Collections.Generic;
 using Rocket.Core.Steam;
 using UnityEngine;
+using System;
 
 namespace rawrfuls.ThePunisher
 {
@@ -56,7 +57,7 @@ namespace rawrfuls.ThePunisher
                     if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log(ThePunisher.Instance.Translate("command_generic_invalid_parameter")); }
                     return;
                 }
-
+                
                 bool isOnline = false;
 
                 CSteamID steamid;
@@ -96,21 +97,31 @@ namespace rawrfuls.ThePunisher
                     if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Found steam ID and player name of player to ban."); }
                 }
 
+                string adminId = "Console";
                 string adminName = "Console";
-                if (caller != null) adminName = caller.ToString();
-
+                if (caller != null)
+                {
+                    adminId = caller.ToString();
+                    adminName = caller.DisplayName;
+                }
+                if (adminId == otherPlayer.CSteamID.ToString())
+                {
+                    UnturnedChat.Say(caller, ThePunisher.Instance.Translate("ban_player_is_you"));
+                    return;
+                }
                 if (command.Length == 3)
                 {
                     int duration = 0;
-                    if (int.TryParse(command[2], out duration))
+                    if (int.TryParse(ThePunisher.Instance.Database.convertTimeToSeconds(command[2]).ToString(), out duration))
                     {
-
-                        ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], duration);
+                        ThePunisher.Instance.Database.logItem(duration.ToString());
+                        ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminId, adminName, command[1], duration);
                         if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Player Successfully Banned."); }
-                        UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                        if (ThePunisher.Instance.Configuration.Instance.DisplayBanMessagePublic)
+                            UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                         if (isOnline)
                         {
-                            Provider.kick(steamid, command[1]);
+                            otherPlayer.Kick(command[1]);
                             if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Banned player has also been kicked."); }
                         }
 
@@ -123,24 +134,47 @@ namespace rawrfuls.ThePunisher
                 }
                 else if (command.Length == 2)
                 {
+                    int duration = 0;
 
-                    ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], 0);
+                    if (ThePunisher.Instance.Database.convertTimeToSeconds(command[1]) != null)
+                    {
+                        int.TryParse(ThePunisher.Instance.Database.convertTimeToSeconds(command[1]).ToString(), out duration);
+                    }
+                    else
+                    {
+                        if (ThePunisher.Instance.Configuration.Instance.DefaultBanDuration != null)
+                        {
+                            if (ThePunisher.Instance.Database.convertTimeToSeconds(ThePunisher.Instance.Configuration.Instance.DefaultBanDuration) != null)
+                                int.TryParse(ThePunisher.Instance.Database.convertTimeToSeconds(ThePunisher.Instance.Configuration.Instance.DefaultBanDuration).ToString(), out duration);
+                        }
+                    }
+                    string reason = "";
+                    if (ThePunisher.Instance.Database.convertTimeToSeconds(command[1]) == null)
+                    {
+                        reason = command[1];
+                    }
+                    ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminId, adminName, reason, duration);
                     if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Player successfully Banned."); }
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                    if (ThePunisher.Instance.Configuration.Instance.DisplayBanMessagePublic)
+                        UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                     if (isOnline)
                     {
-                        Provider.kick(steamid, command[1]);
+                        otherPlayer.Kick(command[1]);
                         if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Banned player has also been kicked."); }
                     }
                 }
                 else
                 {
-                    ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, "", 0);
+                    int duration = 0;
+                    if (ThePunisher.Instance.Database.convertTimeToSeconds(ThePunisher.Instance.Configuration.Instance.DefaultBanDuration) != null)
+                        int.TryParse(ThePunisher.Instance.Database.convertTimeToSeconds(ThePunisher.Instance.Configuration.Instance.DefaultBanDuration).ToString(), out duration);
+                    ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminId, adminName, "", duration);
                     if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Player successfully banned."); }
-                    UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
+                    if (ThePunisher.Instance.Configuration.Instance.DisplayBanMessagePublic)
+                        UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                     if (isOnline)
                     {
-                        Provider.kick(steamid, ThePunisher.Instance.Translate("command_ban_private_default_reason"));
+                        otherPlayer.Kick(ThePunisher.Instance.Translate("command_ban_private_default_reason"));
                         if (ThePunisher.Instance.Configuration.Instance.ShowDebugInfo) { Logger.Log("Banned player has also been kicked!"); }
                     }
                 }

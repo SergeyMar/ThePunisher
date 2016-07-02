@@ -83,7 +83,7 @@ namespace rawrfuls.ThePunisher
 
             if (command.Length >= 2)
             {
-                ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), command[1], 31536000);
+                ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), caller.DisplayName, command[1], 31536000);
                 UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public_reason", charactername, command[1]), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 if (isOnline)
                 {
@@ -94,7 +94,7 @@ namespace rawrfuls.ThePunisher
             }
             else
             {
-                ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), "", 31536000);
+                ThePunisher.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), caller.DisplayName, "", 31536000);
                 UnturnedChat.Say(ThePunisher.Instance.Translate("command_ban_public", charactername), (Color)ThePunisher.Instance.getColor(ThePunisher.Instance.Configuration.Instance.PublicMessageColor));
                 if (isOnline)
                 {

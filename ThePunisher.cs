@@ -76,8 +76,7 @@ namespace rawrfuls.ThePunisher
 
         public void UnturnedPlayerEvents_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
         {
-            string ChatBanned = Database.IsChatBanned(player.ToString());
-            if (ChatBanned != null)
+            if (Database.IsChatBanned(player.ToString()) != null)
             {
                 cancel = true;
             }
@@ -100,6 +99,7 @@ namespace rawrfuls.ThePunisher
                     {"command_generic_player_not_found","Player not found"},
                     {"command_ban_public_reason", "The player {0} was banned for: {1}"},
                     {"command_ban_public","The player {0} was banned"},
+                    {"ban_player_is_you", "You cannot ban yourself!"},
                     {"command_unban_public", "The player {0} was unbanned!"},
                     {"command_ban_private_default_reason","you were banned from the server"},
                     {"command_kick_public_reason", "The player {0} was kicked for: {1}"},
@@ -113,14 +113,29 @@ namespace rawrfuls.ThePunisher
                     /*unmute stuff*/
                     {"command_unmute_public","The player {0} was unmuted."},
                     /*Warning Stuff*/
-                    {"command_warn_public_reason", "The player {0} was warned for: {1}"},
-                    {"command_warn_public", "The player {0} was warned."},
+                    /*{"command_warn_public_reason", "The player {0} was warned for: {1}"},
+                    {"command_warn_public", "The player {0} was warned."},*/
+                    {"warn_command_usage","/warn <name> \"[reason]\" [amt] Amt can be negative to reduce warning level."},
+                    {"invalid_name_provided","An invalid player name was provided."},
+                    {"not_warn_yourself","You cannot warn yourself!"},
+                    {"error_warning_player", "There was an error warning {0}." },
+                    {"warn_msg", "{0} was warned by {1} for {2}. This is warning {3}." },
+                    {"warn_kick_public_msg", "{0} was warned by {1} for {2}.  This is warning {3} and {0} has been kicked." },
+                    {"warn_kick_reason", "This is warning {0}, so you have been kicked." },
+                    {"warn_ban_reason", "This is warning {0}, so you have been banned for {1}." },
+                    {"warn_ban", "This is warning {0}, so have been banned." },
+                    {"warn_ban_public_msg", "{0} was warned by {1} for {2}.  This is warning {3} and {0} has been banned." },
+                    {"warn_reduced_warner_msg","You have reduced {0}'s warning level by {1}.  It is now {2}."},
+                    {"warnings_command_usage","/warnings [name] Will display yours or someone else's warning level."},
+                    {"warnings_no_permission_others","You do not have permission to view others warning level."},
+                    {"warnings_current_level","Your current warnings level is {0}."},
+                    { "warnings_current_level_others", "{0}'s current warnings level is {1}."},
+                    {"warn_player_is_you", "You cannot warn yourself!"},
                     /*Kill stuff*/
                     {"command_kill_public", "The player {0} was forced to kill himself."},
                     /*reporting stuff*/
                     {"command_report_success", "Successfully reported player {0} for: {1}"},
                     {"player_allready_reported", "You have allready reported {0}!"},
-                    {"player_is_you", "You cannot report yourself!"},
                     /*reward stuff*/
                     {"command_reward_success", "{0} has been given {1} for reporting a player"},
                     {"command_reward_success_player", "You have been given {0} for reporting a player"},
@@ -140,6 +155,7 @@ namespace rawrfuls.ThePunisher
                     {"command_whitelist_public", "{0} has been whitelisted!"},
                     {"command_whitelist_remove_public", "{0} has been removed from the whitelist!"},
                     {"whitelist_disabled_error", "Whitelist mode is not enabled, therefore this command will not work!"},
+
                 };
             }
         }
